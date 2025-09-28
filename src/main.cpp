@@ -9,13 +9,13 @@
 #include "../include/camera.h"
 #include "../include/textura.h"
 
-#define PROPORCAO_SOL_MERCURIO   50
+#define PROPORCAO_SOL_MERCURIO   80
 #define RAIO_MERCURIO            0.5
 #define DISTANCIA_MERCURIO       50
 #define VEL_ROTACAO_MERCURIO     0.01f
 #define VEL_TRANSLACAO_MERCURIO  1.0f
 
-GLfloat lookfrom[3] = {80.0f, 100.0f, 250.0f};
+GLfloat lookfrom[3] = {80.0f, 100.0f, 200.0f};
 GLfloat lookat[3]   = {0.0f , -0.05f, -0.1f};
 
 
@@ -28,7 +28,7 @@ Astro saturno (3.4 *DISTANCIA_MERCURIO, 7.5 *RAIO_MERCURIO,  26.73f, 130 *VEL_RO
 Astro urano   (4.0 *DISTANCIA_MERCURIO, 3.4 *RAIO_MERCURIO,  97.77f, 81.4*VEL_ROTACAO_MERCURIO, 0.003 *VEL_TRANSLACAO_MERCURIO, 0, 0, 0);
 Astro netuno  (4.5 *DISTANCIA_MERCURIO, 3.0 *RAIO_MERCURIO,  28.32f, 87.5*VEL_ROTACAO_MERCURIO, 0.0015*VEL_TRANSLACAO_MERCURIO, 0, 0, 0);
 
-Astro lua     (0.1,                  0.2*1.6*RAIO_MERCURIO,    0.0f, 0.0f, 10*VEL_ROTACAO_MERCURIO, 0.0f, 0.0f, 0);
+Astro lua(0.1, 0.2*1.6*RAIO_MERCURIO, 0.0f, 0.0f, 50*VEL_ROTACAO_MERCURIO, 0.0f, 0.0f, 0);
 
 Astro* planetas[8];
 
@@ -36,6 +36,7 @@ GLuint sol_tex, mercurio_tex, venus_tex, terra_tex, marte_tex, jupiter_tex, satu
 
 bool translacaoOn = true;
 bool rotacaoOn = true;
+bool orbitasOn = false;
 
 Camera camera(
     lookfrom[0], lookfrom[1], lookfrom[2],   
@@ -43,6 +44,23 @@ Camera camera(
     0.0f, 0.0f,            
     0.1f, 0.02f      
 );
+
+void desenhaOrbita(float distance) {
+    glDisable(GL_LIGHTING);
+    glDisable(GL_TEXTURE_2D);
+    glColor3f(0.5f, 0.5f, 0.5f);
+
+    glBegin(GL_LINE_LOOP);
+    int numSegments = 1000;
+    for (int i = 0; i < numSegments; ++i) {
+        float angle = 2.0f * M_PI * i / numSegments;
+        float x = cos(angle) * distance;
+        float z = sin(angle) * distance;
+        glVertex3f(x, 0.0f, z);
+    }
+    glEnd();
+    glEnable(GL_LIGHTING);
+}
 
 
 void desenhaBackground() {
@@ -140,6 +158,10 @@ void desenhaLua(){
 static void desenhaPlaneta(Astro& astro) {
 
     glPushMatrix();
+
+    if(orbitasOn) {
+        desenhaOrbita(astro.get_distancia());
+    }
 
     glRotatef(astro.get_anguloTranslacao(), 0.0f, 1.0f, 0.0f);
     glTranslatef(astro.get_distancia(), 0.0f, 0.0f);
@@ -241,14 +263,9 @@ static void display() {
     glLightfv(GL_LIGHT0, GL_AMBIENT,  lightAmb);
 
     desenhaSol();
-    desenhaPlaneta(mercurio);
-    desenhaPlaneta(venus);
-    desenhaPlaneta(terra);
-    desenhaPlaneta(marte);
-    desenhaPlaneta(jupiter);
-    desenhaPlaneta(saturno);
-    desenhaPlaneta(urano);
-    desenhaPlaneta(netuno);
+    for(Astro *planeta: planetas) {
+        desenhaPlaneta(*planeta);
+    }
 
     desenhaAneisSaturno();
     desenhaLua();
@@ -280,18 +297,21 @@ static void reshape(int w, int h) {
     glViewport(0, 0, w, h);
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
-    gluPerspective(45.0, (float)w/(float)h, 0.1, 2000.0);
+    gluPerspective(45.0, (float)w/(float)h, 0.1, 1000.0);
     glMatrixMode(GL_MODELVIEW);
 }
 
 void handleKeys(unsigned char key, int x, int y) {
 
     switch(key) {
-        case 't':
-            translacaoOn = !translacaoOn;
+        case 'o':
+            orbitasOn = !orbitasOn;
             break;
         case 'r':
             rotacaoOn = !rotacaoOn;
+            break;
+        case 't':
+            translacaoOn = !translacaoOn;
             break;
     }
 
@@ -302,7 +322,7 @@ int main(int argc, char** argv) {
     glutInit(&argc, argv);
     glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB | GLUT_DEPTH);
     glutInitWindowSize(1280, 720);
-    glutCreateWindow("Sol e Planetas");
+    glutCreateWindow("Sistema Solar");
 
     initGL();
     glutDisplayFunc(display);
