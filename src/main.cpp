@@ -9,20 +9,31 @@
 #include "../include/camera.h"
 #include "../include/textura.h"
 
+#define PROPORCAO_SOL_MERCURIO 50
+#define RAIO_MERCURIO 0.5
+#define DISTANCIA_MERCURIO 50
 
-Astro mercurio(0.19f * 2 + 6, 1,   0.01f);
-Astro venus  (2.5f * 2 + 6,   1, 177.30f);
-Astro terra  (4.0f  *2 + 6,   1,  23.26f);
-Astro marte   (5.5f *2 + 6,  1,  25.19f);
-Astro jupiter(8.5f  *2 + 6,   1,   3.13f);
-Astro saturno (14.0f*2 + 6, 1,  26.73f);
-Astro urano (18.0f  *2 + 6,   1,  97.77f);
-Astro netuno(25.0f  *2 + 6,   1,  28.32f);
+
+Astro mercurio(     DISTANCIA_MERCURIO,      RAIO_MERCURIO,   0.01f);
+Astro venus   (1.3 *DISTANCIA_MERCURIO, 1.2 *RAIO_MERCURIO, 177.30f);
+Astro terra   (1.6 *DISTANCIA_MERCURIO, 1.3 *RAIO_MERCURIO,  23.26f);
+Astro marte   (2.0 *DISTANCIA_MERCURIO, 1.1 *RAIO_MERCURIO,  25.19f);
+Astro jupiter (2.7 *DISTANCIA_MERCURIO, 8.2*RAIO_MERCURIO,   3.13f);
+Astro saturno (3.4 *DISTANCIA_MERCURIO, 7.5*RAIO_MERCURIO,  26.73f);
+Astro urano   (4.0 *DISTANCIA_MERCURIO, 3.4 *RAIO_MERCURIO,  97.77f);
+Astro netuno  (4.5 *DISTANCIA_MERCURIO, 3.0 *RAIO_MERCURIO,  28.32f);
 
 GLuint sun_tex, mercury_tex, venus_tex, earth_tex, mars_tex, jupiter_tex, saturn_tex, uranus_tex, neptune_tex;
 
+// Camera camera(
+//     0.0f, 25.0f, 80.0f,   
+//     0.0f, 0.0f, -1.0f,    
+//     0.0f, 0.0f,            
+//     0.0f, 0.0f      
+// );
+
 Camera camera(
-    0.0f, 25.0f, 80.0f,   
+    80.0f, 0.0f, 200.0f,   
     0.0f, 0.0f, -1.0f,    
     0.0f, 0.0f,            
     0.0f, 0.0f      
@@ -71,7 +82,7 @@ static void desenhaSol() {
 
     GLUquadric* q = gluNewQuadric();
     gluQuadricTexture(q, GL_TRUE);
-    gluSphere(q, 3, 60, 60); 
+    gluSphere(q, PROPORCAO_SOL_MERCURIO*RAIO_MERCURIO, 60, 60); 
     gluDeleteQuadric(q);
 
     glMaterialfv(GL_FRONT, GL_EMISSION, no_emit);
@@ -82,7 +93,7 @@ static void carregaTexturas() {
     sun_tex     = loadTexture("assets/sun.jpg");     configurarTextura(sun_tex);
     mercury_tex = loadTexture("assets/mercury.jpg"); configurarTextura(mercury_tex);  mercurio.set_textura(mercury_tex);
     venus_tex   = loadTexture("assets/venus.jpg");   configurarTextura(venus_tex);    venus.set_textura(venus_tex);
-    earth_tex   = loadTexture("assets/terra_noite.jpg");   configurarTextura(earth_tex);    terra.set_textura(earth_tex);
+    earth_tex   = loadTexture("assets/earth.jpg");   configurarTextura(earth_tex);    terra.set_textura(earth_tex);
     mars_tex    = loadTexture("assets/mars.jpg");    configurarTextura(mars_tex);     marte.set_textura(mars_tex);
     jupiter_tex = loadTexture("assets/jupiter.jpg"); configurarTextura(jupiter_tex);  jupiter.set_textura(jupiter_tex);
     saturn_tex  = loadTexture("assets/saturn.jpg");  configurarTextura(saturn_tex);   saturno.set_textura(saturn_tex);
@@ -143,7 +154,7 @@ static void reshape(int w, int h) {
     glViewport(0, 0, w, h);
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
-    gluPerspective(45.0, (float)w/(float)h, 0.1, 400.0);
+    gluPerspective(45.0, (float)w/(float)h, 0.1, 2000.0);
     glMatrixMode(GL_MODELVIEW);
 }
 
