@@ -13,10 +13,10 @@
 #define RAIO_MERCURIO            0.5
 #define DISTANCIA_MERCURIO       50
 #define VEL_ROTACAO_MERCURIO     0.01f
-#define VEL_TRANSLACAO_MERCURIO  0.1f
+#define VEL_TRANSLACAO_MERCURIO  1.0f
 
-GLfloat lookfrom[3] = {80.0f, 0.0f, 20.0f};
-GLfloat lookat[3]   = {0.0f , 0.0f, -0.1f};
+GLfloat lookfrom[3] = {80.0f, 100.0f, 250.0f};
+GLfloat lookat[3]   = {0.0f , -0.05f, -0.1f};
 
 
 Astro mercurio(     DISTANCIA_MERCURIO,      RAIO_MERCURIO,   0.01f,      VEL_ROTACAO_MERCURIO,        VEL_TRANSLACAO_MERCURIO, 0, 0, 0);
@@ -32,7 +32,7 @@ Astro lua     (0.1,                  0.2*1.6*RAIO_MERCURIO,    0.0f, 0.0f, 10*VE
 
 Astro* planetas[8];
 
-GLuint sol_tex, mercurio_tex, venus_tex, terra_tex, marte_tex, jupiter_tex, saturno_tex, urano_tex, netuno_tex, lua_tex, aneis_tex;
+GLuint sol_tex, mercurio_tex, venus_tex, terra_tex, marte_tex, jupiter_tex, saturno_tex, urano_tex, netuno_tex, lua_tex, aneis_tex, background_tex;
 
 bool translacaoOn = true;
 bool rotacaoOn = true;
@@ -43,6 +43,26 @@ Camera camera(
     0.0f, 0.0f,            
     0.1f, 0.02f      
 );
+
+
+void desenhaBackground() {
+    
+    glPushMatrix();
+
+    glRotatef(90.0f, 1.0f, 0.0f, 0.0f);
+    glDisable(GL_LIGHTING);
+    glEnable(GL_TEXTURE_2D);
+    glBindTexture(GL_TEXTURE_2D, background_tex);
+    glColor3f(1.0f, 1.0f, 1.0f);
+
+    GLUquadric* quadric = gluNewQuadric();
+    gluQuadricTexture(quadric, GL_TRUE);
+    gluSphere(quadric, 300.0f, 50, 50);
+    gluDeleteQuadric(quadric);
+
+    glEnable(GL_LIGHTING);
+    glPopMatrix();
+}
 
 void desenhaAneisSaturno(){
     glPushMatrix();
@@ -182,6 +202,7 @@ static void carregaTexturas() {
     
     lua_tex      = loadTexture("assets/moon.jpg");    lua.set_textura(lua_tex);
     aneis_tex    = loadTexture("assets/saturnRing.png");
+    background_tex = loadTexture("assets/background.jpg");
 
 }
 
@@ -210,6 +231,7 @@ static void display() {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glLoadIdentity();
     camera.applyView();
+    desenhaBackground();
 
     GLfloat lightPos[] = {0.0f, 0.0f, 0.0f, 1.0f};
     GLfloat lightDiff[] = {1.0f, 1.0f, 0.95f, 1.0f};
