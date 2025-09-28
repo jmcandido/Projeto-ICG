@@ -13,44 +13,119 @@
 #define RAIO_MERCURIO            0.5
 #define DISTANCIA_MERCURIO       50
 #define VEL_ROTACAO_MERCURIO     0.01f
-#define VEL_TRANSLACAO_MERCURIO  1.0f
+#define VEL_TRANSLACAO_MERCURIO  0.1f
+
+GLfloat lookfrom[3] = {80.0f, 0.0f, 20.0f};
+GLfloat lookat[3]   = {0.0f , 0.0f, -0.1f};
 
 
 Astro mercurio(     DISTANCIA_MERCURIO,      RAIO_MERCURIO,   0.01f,      VEL_ROTACAO_MERCURIO,        VEL_TRANSLACAO_MERCURIO, 0, 0, 0);
-Astro venus   (1.3 *DISTANCIA_MERCURIO, 1.2 *RAIO_MERCURIO, 177.30f, 0.24*VEL_ROTACAO_MERCURIO, 0.39  *VEL_TRANSLACAO_MERCURIO, 0, 0, 0);
-Astro terra   (1.6 *DISTANCIA_MERCURIO, 1.3 *RAIO_MERCURIO,  23.26f, 58.6*VEL_ROTACAO_MERCURIO, 0.24  *VEL_TRANSLACAO_MERCURIO, 0, 0, 0);
+Astro venus   (1.3 *DISTANCIA_MERCURIO, 1.2 *RAIO_MERCURIO, 177.30f, 24*VEL_ROTACAO_MERCURIO, 0.39  *VEL_TRANSLACAO_MERCURIO, 0, 0, 0);
+Astro terra   (1.6 *DISTANCIA_MERCURIO, 1.3 *RAIO_MERCURIO,  23.26f, 23.6*VEL_ROTACAO_MERCURIO, 0.24  *VEL_TRANSLACAO_MERCURIO, 0, 0, 0);
 Astro marte   (2.0 *DISTANCIA_MERCURIO, 1.1 *RAIO_MERCURIO,  25.19f, 56.9*VEL_ROTACAO_MERCURIO, 0.13  *VEL_TRANSLACAO_MERCURIO, 0, 0, 0);
-Astro jupiter (2.7 *DISTANCIA_MERCURIO, 8.2 *RAIO_MERCURIO,    3.13f, 143*VEL_ROTACAO_MERCURIO, 0.02  *VEL_TRANSLACAO_MERCURIO, 0, 0, 0);
-Astro saturno (3.4 *DISTANCIA_MERCURIO, 7.5 *RAIO_MERCURIO,   26.73f, 130*VEL_ROTACAO_MERCURIO, 0.008 *VEL_TRANSLACAO_MERCURIO, 0, 0, 0);
+Astro jupiter (2.7 *DISTANCIA_MERCURIO, 8.2 *RAIO_MERCURIO,   3.13f, 143 *VEL_ROTACAO_MERCURIO, 0.02  *VEL_TRANSLACAO_MERCURIO, 0, 0, 0);
+Astro saturno (3.4 *DISTANCIA_MERCURIO, 7.5 *RAIO_MERCURIO,  26.73f, 130 *VEL_ROTACAO_MERCURIO, 0.008 *VEL_TRANSLACAO_MERCURIO, 0, 0, 0);
 Astro urano   (4.0 *DISTANCIA_MERCURIO, 3.4 *RAIO_MERCURIO,  97.77f, 81.4*VEL_ROTACAO_MERCURIO, 0.003 *VEL_TRANSLACAO_MERCURIO, 0, 0, 0);
 Astro netuno  (4.5 *DISTANCIA_MERCURIO, 3.0 *RAIO_MERCURIO,  28.32f, 87.5*VEL_ROTACAO_MERCURIO, 0.0015*VEL_TRANSLACAO_MERCURIO, 0, 0, 0);
 
+Astro lua     (0.1,                  0.2*1.6*RAIO_MERCURIO,    0.0f, 0.0f, 10*VEL_ROTACAO_MERCURIO, 0.0f, 0.0f, 0);
+
 Astro* planetas[8];
 
-GLuint sun_tex, mercury_tex, venus_tex, earth_tex, mars_tex, jupiter_tex, saturn_tex, uranus_tex, neptune_tex;
+GLuint sol_tex, mercurio_tex, venus_tex, terra_tex, marte_tex, jupiter_tex, saturno_tex, urano_tex, netuno_tex, lua_tex, aneis_tex;
 
-// Camera camera(
-//     0.0f, 25.0f, 80.0f,   
-//     0.0f, 0.0f, -1.0f,    
-//     0.0f, 0.0f,            
-//     0.0f, 0.0f      
-// );
+bool translacaoOn = true;
+bool rotacaoOn = true;
 
 Camera camera(
-    80.0f, 0.0f, 200.0f,   
-    0.0f, 0.0f, -1.0f,    
+    lookfrom[0], lookfrom[1], lookfrom[2],   
+    lookat[0],   lookat[1],   lookat[2],    
     0.0f, 0.0f,            
-    0.0f, 0.0f      
+    0.1f, 0.02f      
 );
+
+void desenhaAneisSaturno(){
+    glPushMatrix();
+    
+    glEnable(GL_TEXTURE_2D);
+    glBindTexture(GL_TEXTURE_2D, aneis_tex);
+
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+    glRotatef(saturno.get_anguloTranslacao(), 0.0f, 1.0f, 0.0f);
+    glTranslatef(saturno.get_distancia(), 0.0f, 0.0f);
+    glRotatef(-saturno.get_anguloTranslacao(), 0.0f, 1.0f, 0.0f);
+    
+    glRotatef(saturno.get_inclinacaoEixo(), 1.0f, 0.0f, 0.0f);
+    
+    int segments = 300;
+    float raioInt = 1.1161478728*saturno.get_raio();
+    float raioExt = 2.327404261*saturno.get_raio();
+
+    glBegin(GL_QUAD_STRIP);
+    
+    for (int i = 0; i <= segments; i++) {
+        float angle = 2.0f * M_PI * i / segments;
+        float x = cos(angle);
+        float z = sin(angle);
+        float sCoord = (float)i / (float)segments;
+
+        glNormal3f(0.0f, 1.0f, 0.0f);
+
+        glTexCoord2f(sCoord, 1.0f);
+        glVertex3f(raioExt * x, 0.0f, raioExt * z);
+
+        glTexCoord2f(sCoord, 0.0f);
+        glVertex3f(raioInt * x, 0.0f, raioInt * z);
+    }
+    glEnd();
+
+    glDisable(GL_BLEND);
+    glDisable(GL_TEXTURE_2D);
+    glPopMatrix();
+}
+
+void desenhaLua(){
+    glPushMatrix();
+
+    glRotatef(terra.get_anguloTranslacao(), 0.0f, 1.0f, 0.0f);
+    glTranslatef(terra.get_distancia(), 0.0f, 0.0f);       
+    glRotatef(-terra.get_anguloTranslacao(), 0.0f, 1.0f, 0.0f);
+    glRotatef(lua.get_anguloTranslacao(), 0.0f, 1.0f, 0.0f);
+
+    float anguloOrbitalZ = 5.2*sin(lua.get_anguloTranslacao()*(M_PI/180));
+    glRotatef(anguloOrbitalZ, 0.0f, 0.0f, 1.0f);
+    glTranslatef((lua.get_raio()+terra.get_raio()+lua.get_distancia())*1.6, 0.0f, 0.0f);
+    
+    glRotatef(-90.0f, 1.0f, 0.0f, 0.0f);
+    
+    if (lua.get_textura()) {
+        glEnable(GL_TEXTURE_2D);
+        glBindTexture(GL_TEXTURE_2D, lua.get_textura());
+        glColor3f(1.0f, 1.0f, 1.0f);                    
+    } else {
+        glColor3f(1.0f, 0.0f, 0.0f);
+        glDisable(GL_TEXTURE_2D);
+    }
+    
+    GLUquadric* quadric = gluNewQuadric();
+    gluQuadricTexture(quadric, GL_TRUE);
+    gluSphere(quadric, lua.get_raio(), 50, 50);
+    gluDeleteQuadric(quadric);
+
+    glPopMatrix();
+}
 
 static void desenhaPlaneta(Astro& astro) {
 
     glPushMatrix();
+
     glRotatef(astro.get_anguloTranslacao(), 0.0f, 1.0f, 0.0f);
     glTranslatef(astro.get_distancia(), 0.0f, 0.0f);
     glRotatef(-astro.get_anguloTranslacao(), 0.0f, 1.0f, 0.0f);
 
-    glRotatef(astro.get_inclinacaoEixo() - 90.0f, 1.0f, 0.0f, 0.0f);
+    glRotatef(astro.get_inclinacaoEixo()-90, 1.0f, 0.0f, 0.0f);
     glRotatef(astro.get_anguloRotacao(), 0.0f, 0.0f, 1.0f);
 
     if (astro.get_textura()) {
@@ -76,9 +151,9 @@ static void desenhaSol() {
     GLfloat no_emit[]  = {0.0f, 0.0f, 0.0f, 1.0f};
     glMaterialfv(GL_FRONT, GL_EMISSION, emit);
 
-    if (sun_tex) {
+    if (sol_tex) {
         glEnable(GL_TEXTURE_2D);
-        glBindTexture(GL_TEXTURE_2D, sun_tex);
+        glBindTexture(GL_TEXTURE_2D, sol_tex);
         glColor3f(1.0f, 1.0f, 1.0f);
     } else {
         glDisable(GL_TEXTURE_2D);
@@ -95,15 +170,19 @@ static void desenhaSol() {
 }
 
 static void carregaTexturas() {
-    sun_tex     = loadTexture("assets/sun.jpg");     configurarTextura(sun_tex);
-    mercury_tex = loadTexture("assets/mercury.jpg"); configurarTextura(mercury_tex);  mercurio.set_textura(mercury_tex);
-    venus_tex   = loadTexture("assets/venus.jpg");   configurarTextura(venus_tex);    venus.set_textura(venus_tex);
-    earth_tex   = loadTexture("assets/earth.jpg");   configurarTextura(earth_tex);    terra.set_textura(earth_tex);
-    mars_tex    = loadTexture("assets/mars.jpg");    configurarTextura(mars_tex);     marte.set_textura(mars_tex);
-    jupiter_tex = loadTexture("assets/jupiter.jpg"); configurarTextura(jupiter_tex);  jupiter.set_textura(jupiter_tex);
-    saturn_tex  = loadTexture("assets/saturn.jpg");  configurarTextura(saturn_tex);   saturno.set_textura(saturn_tex);
-    uranus_tex  = loadTexture("assets/uranus.jpg");  configurarTextura(uranus_tex);   urano.set_textura(uranus_tex);
-    neptune_tex = loadTexture("assets/neptune.jpg"); configurarTextura(neptune_tex);  netuno.set_textura(neptune_tex);
+    sol_tex      = loadTexture("assets/sun.jpg");     
+    mercurio_tex = loadTexture("assets/mercury.jpg"); mercurio.set_textura(mercurio_tex); configurarTextura(mercurio.get_textura());
+    venus_tex    = loadTexture("assets/venus.jpg");   venus.set_textura(venus_tex);       configurarTextura(venus.get_textura());
+    terra_tex    = loadTexture("assets/earth.jpg");   terra.set_textura(terra_tex);       configurarTextura(terra.get_textura());
+    marte_tex    = loadTexture("assets/mars.jpg");    marte.set_textura(marte_tex);       configurarTextura(marte.get_textura());
+    jupiter_tex  = loadTexture("assets/jupiter.jpg"); jupiter.set_textura(jupiter_tex);   configurarTextura(jupiter.get_textura());
+    saturno_tex  = loadTexture("assets/saturn.jpg");  saturno.set_textura(saturno_tex);   configurarTextura(saturno.get_textura());
+    urano_tex    = loadTexture("assets/uranus.jpg");  urano.set_textura(urano_tex);       configurarTextura(urano.get_textura());
+    netuno_tex   = loadTexture("assets/neptune.jpg"); netuno.set_textura(netuno_tex);     configurarTextura(netuno.get_textura());
+    
+    lua_tex      = loadTexture("assets/moon.jpg");    lua.set_textura(lua_tex);
+    aneis_tex    = loadTexture("assets/saturnRing.png");
+
 }
 
 static void initGL() {
@@ -149,14 +228,25 @@ static void display() {
     desenhaPlaneta(urano);
     desenhaPlaneta(netuno);
 
+    desenhaAneisSaturno();
+    desenhaLua();
+
     glutSwapBuffers();
 }
 
 void update(int value) {
     
-    for(Astro *planeta: planetas) {
-        planeta->update_anguloRotacao();
-        planeta->update_anguloTranslacao();
+    if(translacaoOn) {
+        for(Astro *planeta: planetas) {
+            planeta->update_anguloTranslacao();
+        }
+        lua.update_anguloTranslacao();
+    }
+
+    if(rotacaoOn) {
+        for(Astro *planeta: planetas) {
+            planeta->update_anguloRotacao();
+        }
     }
 
     glutPostRedisplay();
@@ -172,6 +262,20 @@ static void reshape(int w, int h) {
     glMatrixMode(GL_MODELVIEW);
 }
 
+void handleKeys(unsigned char key, int x, int y) {
+
+    switch(key) {
+        case 't':
+            translacaoOn = !translacaoOn;
+            break;
+        case 'r':
+            rotacaoOn = !rotacaoOn;
+            break;
+    }
+
+    glutPostRedisplay();
+}
+
 int main(int argc, char** argv) {
     glutInit(&argc, argv);
     glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB | GLUT_DEPTH);
@@ -181,7 +285,7 @@ int main(int argc, char** argv) {
     initGL();
     glutDisplayFunc(display);
     glutReshapeFunc(reshape);
-
+    glutKeyboardFunc(handleKeys);
     glutTimerFunc(25, update, 0);
 
     glutMainLoop();

@@ -82,7 +82,7 @@ void Astro::draw() {
     glRotatef(this->anguloTranslacao, 0.0f, 1.0f, 0.0f);
     glTranslatef(this->distancia, 0.0f, 0.0f);
     glRotatef(-this->anguloTranslacao, 0.0f, 1.0f, 0.0f);
-    glRotatef(this->inclinacaoEixo - 90, 1.0f, 0.0f, 0.0f);
+    glRotatef(this->inclinacaoEixo-90, 0.0f, 0.0f, 0.0f);
     glRotatef(this->anguloRotacao, 0.0f, 0.0f, 1.0f);
 
     if (this->textura) {
