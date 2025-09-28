@@ -17,7 +17,7 @@ public:
     Astro(); 
     ~Astro(); 
 
-    Astro(float dist, float r, float incl); 
+    Astro(float dist, float r, float incl, float velRot, float velTrans, float angRot, float angTrans, GLuint tex); 
 
     float get_distancia();
     float get_raio();

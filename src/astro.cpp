@@ -3,8 +3,8 @@
 Astro::Astro() {}
 Astro::~Astro() {}
 
-Astro::Astro(float dist, float r, float incl)
-    : distancia(dist), raio(r), inclinacaoEixo(incl) {}
+Astro::Astro(float dist, float r, float incl, float velRot, float velTrans, float angRot, float angTrans, GLuint tex)
+    : distancia(dist), raio(r), inclinacaoEixo(incl) , velRotacao(velRot), velTranslacao(velTrans), anguloRotacao(angRot), anguloTranslacao(angTrans), textura(tex){}
 
 float Astro::get_distancia()
 {
