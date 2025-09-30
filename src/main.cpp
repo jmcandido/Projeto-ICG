@@ -217,6 +217,17 @@ static void desenhaSol() {
     glPopMatrix();
 }
 
+void follow() {
+    
+    camera.set_posZ(target->get_distancia() * cos((target->get_anguloTranslacao()+espacamentoAngular)*0.0174533));
+    camera.set_posX(target->get_distancia() * sin((target->get_anguloTranslacao()+espacamentoAngular)*0.0174533));
+    camera.set_posY(0.0);
+
+
+    camera.set_angleH(-target->get_anguloTranslacao()*0.0174533-0.1);
+    camera.set_angleV(0.0);
+}
+
 static void carregaTexturas() {
     
     sol_tex      = loadTexture("assets/sun.jpg");     

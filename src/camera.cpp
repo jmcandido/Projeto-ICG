@@ -33,11 +33,37 @@ float Camera::get_angle_ver(){
     return this->angleV;
 }
 
+float Camera::get_posX(){
+    return this->posX;
+}
+
+float Camera::get_posY(){
+    return this->posY;
+}
+
+float Camera::get_posZ(){
+    return this->posZ;
+}
 
 void Camera::set_angle_hor(float angleH)
 {
     this->angleH = angleH;
     updateLookDirection();
+}
+
+void Camera::set_posX(float posX)
+{
+    this->posX = posX;
+}
+
+void Camera::set_posY(float posY)
+{
+    this->posY = posY;
+}
+
+void Camera::set_posZ(float posZ)
+{
+    this->posZ = posZ;
 }
 
 void Camera::set_angle_ver(float angleV)
