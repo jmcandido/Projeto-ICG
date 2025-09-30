@@ -15,6 +15,8 @@
 #define VEL_ROTACAO_MERCURIO     0.01f
 #define VEL_TRANSLACAO_MERCURIO  1.0f
 
+#define SENSE_MOUSE 0.002f
+
 GLfloat lookfrom[3] = {80.0f, 100.0f, 200.0f};
 GLfloat lookat[3]   = {0.0f , -0.05f, -0.1f};
 
@@ -28,6 +30,8 @@ Astro saturno (3.4 *DISTANCIA_MERCURIO, 7.5 *RAIO_MERCURIO,  26.73f, 130 *VEL_RO
 Astro urano   (4.0 *DISTANCIA_MERCURIO, 3.4 *RAIO_MERCURIO,  97.77f, 81.4*VEL_ROTACAO_MERCURIO, 0.003 *VEL_TRANSLACAO_MERCURIO, 0, 0, 0);
 Astro netuno  (4.5 *DISTANCIA_MERCURIO, 3.0 *RAIO_MERCURIO,  28.32f, 87.5*VEL_ROTACAO_MERCURIO, 0.0015*VEL_TRANSLACAO_MERCURIO, 0, 0, 0);
 
+
+
 Astro lua(0.1, 0.2*1.6*RAIO_MERCURIO, 0.0f, 0.0f, 50*VEL_ROTACAO_MERCURIO, 0.0f, 0.0f, 0);
 
 Astro* planetas[8];
@@ -37,6 +41,9 @@ GLuint sol_tex, mercurio_tex, venus_tex, terra_tex, marte_tex, jupiter_tex, satu
 bool translacaoOn = true;
 bool rotacaoOn = true;
 bool orbitasOn = false;
+
+int lastMouseX;
+int lastMouseY;
 
 Camera camera(
     lookfrom[0], lookfrom[1], lookfrom[2],   
@@ -61,7 +68,6 @@ void desenhaOrbita(float distance) {
     glEnd();
     glEnable(GL_LIGHTING);
 }
-
 
 void desenhaBackground() {
     
@@ -212,20 +218,23 @@ static void desenhaSol() {
 }
 
 static void carregaTexturas() {
+    
     sol_tex      = loadTexture("assets/sun.jpg");     
-    mercurio_tex = loadTexture("assets/mercury.jpg"); mercurio.set_textura(mercurio_tex); configurarTextura(mercurio.get_textura());
-    venus_tex    = loadTexture("assets/venus.jpg");   venus.set_textura(venus_tex);       configurarTextura(venus.get_textura());
-    terra_tex    = loadTexture("assets/earth.jpg");   terra.set_textura(terra_tex);       configurarTextura(terra.get_textura());
-    marte_tex    = loadTexture("assets/mars.jpg");    marte.set_textura(marte_tex);       configurarTextura(marte.get_textura());
-    jupiter_tex  = loadTexture("assets/jupiter.jpg"); jupiter.set_textura(jupiter_tex);   configurarTextura(jupiter.get_textura());
-    saturno_tex  = loadTexture("assets/saturn.jpg");  saturno.set_textura(saturno_tex);   configurarTextura(saturno.get_textura());
-    urano_tex    = loadTexture("assets/uranus.jpg");  urano.set_textura(urano_tex);       configurarTextura(urano.get_textura());
-    netuno_tex   = loadTexture("assets/neptune.jpg"); netuno.set_textura(netuno_tex);     configurarTextura(netuno.get_textura());
+    aneis_tex    = loadTexture("assets/saturnRing.png"); 
+    mercurio_tex = loadTexture("assets/mercury.jpg"); mercurio.set_textura(mercurio_tex); 
+    venus_tex    = loadTexture("assets/venus.jpg");   venus.set_textura(venus_tex);       
+    terra_tex    = loadTexture("assets/earth.jpg");   terra.set_textura(terra_tex);       
+    marte_tex    = loadTexture("assets/mars.jpg");    marte.set_textura(marte_tex);       
+    jupiter_tex  = loadTexture("assets/jupiter.jpg"); jupiter.set_textura(jupiter_tex);   
+    saturno_tex  = loadTexture("assets/saturn.jpg");  saturno.set_textura(saturno_tex);  
+    urano_tex    = loadTexture("assets/uranus.jpg");  urano.set_textura(urano_tex);       
+    netuno_tex   = loadTexture("assets/neptune.jpg"); netuno.set_textura(netuno_tex);  
     
     lua_tex      = loadTexture("assets/moon.jpg");    lua.set_textura(lua_tex);
-    aneis_tex    = loadTexture("assets/saturnRing.png");
-    background_tex = loadTexture("assets/background.jpg");
 
+    
+
+    background_tex = loadTexture("assets/background.jpg");
 }
 
 static void initGL() {
@@ -318,6 +327,25 @@ void handleKeys(unsigned char key, int x, int y) {
     glutPostRedisplay();
 }
 
+void mouseMotion(int x, int y) {
+    int deltaX = x - lastMouseX;
+    int deltaY = y - lastMouseY;
+
+    camera.set_angle_hor(camera.get_angle_hor() + deltaX * SENSE_MOUSE);
+    camera.set_angle_ver(camera.get_angle_ver() - deltaY * SENSE_MOUSE);
+
+    lastMouseX = x;
+    lastMouseY = y;
+}
+
+
+void mouseButton(int button, int state, int x, int y) {
+    if (button == GLUT_LEFT_BUTTON && state == GLUT_DOWN) {
+        lastMouseX = x;
+        lastMouseY = y;
+    }
+}
+
 int main(int argc, char** argv) {
     glutInit(&argc, argv);
     glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB | GLUT_DEPTH);
@@ -328,6 +356,8 @@ int main(int argc, char** argv) {
     glutDisplayFunc(display);
     glutReshapeFunc(reshape);
     glutKeyboardFunc(handleKeys);
+    glutMouseFunc(mouseButton);
+    glutMotionFunc(mouseMotion);
     glutTimerFunc(25, update, 0);
 
     glutMainLoop();
