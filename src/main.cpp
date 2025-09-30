@@ -12,13 +12,16 @@
 #define PROPORCAO_SOL_MERCURIO   80
 #define RAIO_MERCURIO            0.5
 #define DISTANCIA_MERCURIO       50
-#define VEL_ROTACAO_MERCURIO     0.01f
-#define VEL_TRANSLACAO_MERCURIO  1.0f
+#define VEL_ROTACAO_MERCURIO     0.1f
+#define VEL_TRANSLACAO_MERCURIO  10.0f
 
 #define SENSE_MOUSE 0.002f
 
-GLfloat lookfrom[3] = {80.0f, 100.0f, 200.0f};
-GLfloat lookat[3]   = {0.0f , -0.05f, -0.1f};
+// GLfloat lookfrom[3] = {80.0f, 20.0f, 200.0f};
+// GLfloat lookat[3]   = {0.0f , -0.1f, -0.1f};
+
+GLfloat lookfrom[3] = {75.0f, 0.0f, 0.0f};
+GLfloat lookat[3]   = {100.0f , -0.1f, -0.1f};
 
 
 Astro mercurio(     DISTANCIA_MERCURIO,      RAIO_MERCURIO,   0.01f,      VEL_ROTACAO_MERCURIO,        VEL_TRANSLACAO_MERCURIO, 0, 0, 0);
@@ -35,12 +38,23 @@ Astro netuno  (4.5 *DISTANCIA_MERCURIO, 3.0 *RAIO_MERCURIO,  28.32f, 87.5*VEL_RO
 Astro lua(0.1, 0.2*1.6*RAIO_MERCURIO, 0.0f, 0.0f, 50*VEL_ROTACAO_MERCURIO, 0.0f, 0.0f, 0);
 
 Astro* planetas[8];
+Astro* alvo;
 
 GLuint sol_tex, mercurio_tex, venus_tex, terra_tex, marte_tex, jupiter_tex, saturno_tex, urano_tex, netuno_tex, lua_tex, aneis_tex, background_tex;
 
-bool translacaoOn = true;
+bool translacaoOn = false;
 bool rotacaoOn = true;
 bool orbitasOn = false;
+bool cameraLocked = false;
+
+bool moveUp = false;
+bool moveDown = false;
+bool moveLeft = false;
+bool moveRight = false;
+bool moveFoward = false;
+bool moveBackward = false;
+
+float espacamentoAngular = 100.0f;
 
 int lastMouseX;
 int lastMouseY;
@@ -218,14 +232,24 @@ static void desenhaSol() {
 }
 
 void follow() {
-    
-    camera.set_posZ(target->get_distancia() * cos((target->get_anguloTranslacao()+espacamentoAngular)*0.0174533));
-    camera.set_posX(target->get_distancia() * sin((target->get_anguloTranslacao()+espacamentoAngular)*0.0174533));
+    if (!alvo) 
+        return; // evita crash se não tiver alvo selecionado
+    camera.set_posZ(alvo->get_distancia() * cos((alvo->get_anguloTranslacao()+espacamentoAngular)*0.0174533));
+    camera.set_posX(alvo->get_distancia() * sin((alvo->get_anguloTranslacao()+espacamentoAngular)*0.0174533));
     camera.set_posY(0.0);
 
+    camera.set_angle_hor(-alvo->get_anguloTranslacao()*0.0174533f - 0.1f);
+    camera.set_angle_ver(0.0f);
+}
 
-    camera.set_angleH(-target->get_anguloTranslacao()*0.0174533-0.1);
-    camera.set_angleV(0.0);
+static void toggleLock(Astro* novoAlvo, float esp) {
+    if (cameraLocked && alvo == novoAlvo) {
+        cameraLocked = false;  // destrava se já estava no mesmo
+    } else {
+        alvo = novoAlvo;
+        espacamentoAngular = esp;
+        cameraLocked = true;   // trava no novo alvo
+    }
 }
 
 static void carregaTexturas() {
@@ -308,6 +332,18 @@ void update(int value) {
         }
     }
 
+    if (cameraLocked) 
+        follow();
+    else{                                       // Atualiza a posição da câmera com base na direção de visualização
+        if (moveFoward) camera.moveForward();       // Se a tecla de mover para frente estiver pressionada
+        if (moveBackward) camera.moveBackward();    // Se a tecla de mover para trás estiver pressionada
+        if (moveLeft) camera.moveLeft();            // Se a tecla de mover para a esquerda estiver pressionada
+        if (moveRight) camera.moveRight();          // Se a tecla de mover para a direita estiver pressionada
+        if (moveUp) camera.moveUp();              // Mover a câmera para cima
+        if (moveDown) camera.moveDown();          // Mover a câmera para baixo
+    }
+
+    camera.updateLookDirection();
     glutPostRedisplay();
     glutTimerFunc(16, update, 0);
 }
@@ -321,17 +357,57 @@ static void reshape(int w, int h) {
     glMatrixMode(GL_MODELVIEW);
 }
 
-void handleKeys(unsigned char key, int x, int y) {
+void movementKeys(unsigned char key, int x, int y) {
+    // Verifica qual tecla foi pressionada e altera o estado das variáveis de movimento da câmera
+    switch (key) {
+        case 'a':  // Mover a câmera para a esquerda
+            moveLeft = !moveLeft; // Alterna o estado do movimento para a esquerda
+            break;
+        case 'd':  // Mover a câmera para a direita
+            moveRight = !moveRight; // Alterna o estado do movimento para a direita
+            break;
+        case 'w':  // Mover a câmera para frente
+            moveFoward = !moveFoward; // Alterna o estado do movimento para frente
+            break;
+        case 's':  // Mover a câmera para trás
+            moveBackward = !moveBackward; // Alterna o estado do movimento para trás
+            break;
+        case ' ':  // Mover a câmera para cima (eixo y)
+            moveUp = !moveUp; // Alterna o estado do movimento para cima
+            break;
+        case 'c':   // Mover a câmera para baixo (eixo y)
+            moveDown = !moveDown; // Alterna o estado do movimento para baixo
+            break;
+    }
+    glutPostRedisplay(); // Solicita uma nova exibição após a mudança de estado
+}
 
-    switch(key) {
-        case 'o':
-            orbitasOn = !orbitasOn;
-            break;
-        case 'r':
-            rotacaoOn = !rotacaoOn;
-            break;
-        case 't':
-            translacaoOn = !translacaoOn;
+void handleKeys(unsigned char key, int x, int y) {
+    movementKeys(key, x, y);
+
+    switch (key) {
+        case 'o': orbitasOn = !orbitasOn; break;
+        case 'r': rotacaoOn = !rotacaoOn; break;
+        case 't': translacaoOn = !translacaoOn; break;
+
+        case '1': toggleLock(&mercurio, 88.3f); break;
+        case '2': toggleLock(&venus,    88.3f); break;
+        case '3': toggleLock(&terra,    88.3f); break;
+        case '4': toggleLock(&marte,    88.3f); break;
+        case '5': toggleLock(&jupiter,  82.6f); break;
+        case '6': toggleLock(&saturno,  82.6f); break;
+        case '7': toggleLock(&urano,    87.4f); break;
+        case '8': toggleLock(&netuno,   87.8f); break;
+
+        case '0': cameraLocked = false; break; // atalho: destravar sempre
+
+        case 'l': // reset de câmera -> faz sentido também destravar
+            camera.set_posX(lookfrom[0]);
+            camera.set_posY(lookfrom[1]);
+            camera.set_posZ(lookfrom[2]);
+            camera.set_angle_hor(0.0f);
+            camera.set_angle_ver(0.0f);
+            cameraLocked = false; // solta o lock ao resetar
             break;
     }
 
@@ -348,7 +424,6 @@ void mouseMotion(int x, int y) {
     lastMouseX = x;
     lastMouseY = y;
 }
-
 
 void mouseButton(int button, int state, int x, int y) {
     if (button == GLUT_LEFT_BUTTON && state == GLUT_DOWN) {

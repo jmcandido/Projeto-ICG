@@ -13,15 +13,56 @@ void Camera::applyView() {
 }
 
 
-void Camera::updateLookDirection() {
-    float ch = std::cos(angleH);
-    float sh = std::sin(angleH);
-    float cv = std::cos(angleV);
-    float sv = std::sin(angleV);
+// void Camera::updateLookDirection() {
+//     float ch = std::cos(angleH);
+//     float sh = std::sin(angleH);
+//     float cv = std::cos(angleV);
+//     float sv = std::sin(angleV);
 
-    lookX = cv * ch;
-    lookY = sv;
-    lookZ = cv * sh;
+//     lookX = cv * ch;
+//     lookY = sv;
+//     lookZ = cv * sh;
+// }
+
+
+void Camera::updateLookDirection()
+{
+    this->lookX = sin(this->angleH) * cos(this->angleV);
+    this->lookY = sin(this->angleV);
+    this->lookZ = -cos(this->angleH) * cos(this->angleV);
+}
+
+void Camera::moveForward() {
+    posX += lookX * movementSpeed;
+    posY += lookY * movementSpeed;
+    posZ += lookZ * movementSpeed;
+}
+
+void Camera::moveBackward() {
+    posX -= lookX * movementSpeed;
+    posY -= lookY * movementSpeed;
+    posZ -= lookZ * movementSpeed;
+}
+void Camera::moveLeft()
+{
+    this->posX += this->lookZ * this->movementSpeed;
+    this->posZ -= this->lookX * this->movementSpeed;
+}
+
+void Camera::moveRight()
+{
+    this->posX -= this->lookZ * this->movementSpeed;
+    this->posZ += this->lookX * this->movementSpeed;
+}
+
+void Camera::moveUp()
+{
+    this->posY += this->movementSpeed;
+}
+
+void Camera::moveDown()
+{
+    this->posY -= this->movementSpeed;
 }
 
 
@@ -45,10 +86,19 @@ float Camera::get_posZ(){
     return this->posZ;
 }
 
+float Camera::get_movementSpeed()
+{
+    return this->movementSpeed;
+}
+
+float Camera::get_rotationSpeed()
+{
+    return this->rotationSpeed;
+}
+
 void Camera::set_angle_hor(float angleH)
 {
     this->angleH = angleH;
-    updateLookDirection();
 }
 
 void Camera::set_posX(float posX)
@@ -73,5 +123,9 @@ void Camera::set_angle_ver(float angleV)
     else if (angleV > 1.5)
     this->angleV = 1.5;
     else this->angleV = angleV;
-    updateLookDirection();
+}
+
+void Camera::set_movementSpeed(float movementSpeed)
+{
+    this->movementSpeed = movementSpeed;
 }

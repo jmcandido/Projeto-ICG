@@ -26,13 +26,22 @@ public:
    float get_posX();
    float get_posY();
    float get_posZ();
-
-
+   float get_movementSpeed();
+   float get_rotationSpeed();
+   
    void set_angle_hor(float);
    void set_angle_ver(float);
    void set_posX(float posX);
    void set_posY(float posY);
    void set_posZ(float posZ);
+   void set_movementSpeed(float movementSpeed);
+    
+   void moveForward();
+   void moveBackward();
+   void moveLeft();
+   void moveRight();
+   void moveUp();
+   void moveDown();
 };
 
 #endif // CAMERA_H
