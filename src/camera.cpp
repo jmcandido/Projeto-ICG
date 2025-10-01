@@ -12,19 +12,6 @@ void Camera::applyView() {
               0.0, 1.0, 0.0);
 }
 
-
-// void Camera::updateLookDirection() {
-//     float ch = std::cos(angleH);
-//     float sh = std::sin(angleH);
-//     float cv = std::cos(angleV);
-//     float sv = std::sin(angleV);
-
-//     lookX = cv * ch;
-//     lookY = sv;
-//     lookZ = cv * sh;
-// }
-
-
 void Camera::updateLookDirection()
 {
     this->lookX = sin(this->angleH) * cos(this->angleV);

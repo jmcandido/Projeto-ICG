@@ -12,16 +12,20 @@
 #define PROPORCAO_SOL_MERCURIO   80
 #define RAIO_MERCURIO            0.5
 #define DISTANCIA_MERCURIO       50
-#define VEL_ROTACAO_MERCURIO     0.1f
+#define VEL_ROTACAO_MERCURIO     0.05f
 #define VEL_TRANSLACAO_MERCURIO  10.0f
 
 #define SENSE_MOUSE 0.002f
 
-// GLfloat lookfrom[3] = {80.0f, 20.0f, 200.0f};
-// GLfloat lookat[3]   = {0.0f , -0.1f, -0.1f};
+GLfloat lookfrom[3] = {80.0f, 100.0f, 200.0f};
+GLfloat lookat[3]   = {0.0f , -0.1f, -0.1f};
+GLfloat angleH = 0.0f;
+GLfloat angleV = -0.3f;
 
-GLfloat lookfrom[3] = {75.0f, 0.0f, 0.0f};
-GLfloat lookat[3]   = {100.0f , -0.1f, -0.1f};
+// GLfloat lookfrom[3] = {75.0f, 0.0f, 0.0f};
+// GLfloat lookat[3]   = {0.0f , -0.1f, -0.1f};
+// GLfloat angleH = 20.4f;
+// GLfloat angleV = 0.0f;
 
 
 Astro mercurio(     DISTANCIA_MERCURIO,      RAIO_MERCURIO,   0.01f,      VEL_ROTACAO_MERCURIO,        VEL_TRANSLACAO_MERCURIO, 0, 0, 0);
@@ -35,7 +39,7 @@ Astro netuno  (4.5 *DISTANCIA_MERCURIO, 3.0 *RAIO_MERCURIO,  28.32f, 87.5*VEL_RO
 
 
 
-Astro lua(0.1, 0.2*1.6*RAIO_MERCURIO, 0.0f, 0.0f, 50*VEL_ROTACAO_MERCURIO, 0.0f, 0.0f, 0);
+Astro lua(0.1, 0.2*1.0*RAIO_MERCURIO, 0.0f, 0.0f, 5*VEL_ROTACAO_MERCURIO, 0.0f, 0.0f, 0);
 
 Astro* planetas[8];
 Astro* alvo;
@@ -62,7 +66,7 @@ int lastMouseY;
 Camera camera(
     lookfrom[0], lookfrom[1], lookfrom[2],   
     lookat[0],   lookat[1],   lookat[2],    
-    0.0f, 0.0f,            
+    angleH, angleV,            
     0.1f, 0.02f      
 );
 
@@ -87,12 +91,19 @@ void desenhaBackground() {
     
     glPushMatrix();
 
+    // Rotaciona a esfera do background para a orientada desejada
     glRotatef(90.0f, 1.0f, 0.0f, 0.0f);
+
+    // Desliga a iluminação para que o background não seja afetado pelas luzes da cena
     glDisable(GL_LIGHTING);
+
+    // Ativa a textura do fundo e define cor branca
+    // para que a textura apareça sem alteração de cor
     glEnable(GL_TEXTURE_2D);
     glBindTexture(GL_TEXTURE_2D, background_tex);
     glColor3f(1.0f, 1.0f, 1.0f);
 
+    // Cria uma esfera que servirá como universo" e aplica a textura
     GLUquadric* quadric = gluNewQuadric();
     gluQuadricTexture(quadric, GL_TRUE);
     gluSphere(quadric, 300.0f, 50, 50);
@@ -105,24 +116,32 @@ void desenhaBackground() {
 void desenhaAneisSaturno(){
     glPushMatrix();
     
+    // Ativa o uso de texturas e associa a textura dos anéis
     glEnable(GL_TEXTURE_2D);
     glBindTexture(GL_TEXTURE_2D, aneis_tex);
 
+    // Ativa blending para permitir transparência na textura dos anéis
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
+    // Aplica a translação de Saturno
     glRotatef(saturno.get_anguloTranslacao(), 0.0f, 1.0f, 0.0f);
+    // Move até a posição de Saturno em relação ao Sol 
     glTranslatef(saturno.get_distancia(), 0.0f, 0.0f);
+    // Remove a rotação em torno do Sol para manter os anéis fixos em Saturno
     glRotatef(-saturno.get_anguloTranslacao(), 0.0f, 1.0f, 0.0f);
     
-    glRotatef(saturno.get_inclinacaoEixo(), 1.0f, 0.0f, 0.0f);
+    // Aplicação inclinação os anéis de acordo com a inclinação do eixo de Saturno
+    glRotatef(-saturno.get_inclinacaoEixo(), 0.0f, 0.0f, 1.0f);
     
+    // Define os raios interno e externo dos anéis, em proporção ao raio do planeta
     int segments = 300;
-    float raioInt = 1.1161478728*saturno.get_raio();
-    float raioExt = 2.327404261*saturno.get_raio();
+    float raioInt = 1.12*saturno.get_raio();
+    float raioExt = 2.33*saturno.get_raio();
 
     glBegin(GL_QUAD_STRIP);
     
+    // Cria uma um disco com furo no meio representando os anéis.
     for (int i = 0; i <= segments; i++) {
         float angle = 2.0f * M_PI * i / segments;
         float x = cos(angle);
@@ -146,14 +165,18 @@ void desenhaAneisSaturno(){
 
 void desenhaLua(){
     glPushMatrix();
-
+    
+    // Aplica a translação orbital da Terra
     glRotatef(terra.get_anguloTranslacao(), 0.0f, 1.0f, 0.0f);
-    glTranslatef(terra.get_distancia(), 0.0f, 0.0f);       
-    glRotatef(-terra.get_anguloTranslacao(), 0.0f, 1.0f, 0.0f);
+    // Move até a posição da Terra em relação ao Sol    
+    glTranslatef(terra.get_distancia(), 0.0f, 0.0f); 
+    // Aplica a rotação da órbita da Lua em torno da Terra      
     glRotatef(lua.get_anguloTranslacao(), 0.0f, 1.0f, 0.0f);
 
+    // Inclinação do plano orbital da Lua
     float anguloOrbitalZ = 5.2*sin(lua.get_anguloTranslacao()*(M_PI/180));
     glRotatef(anguloOrbitalZ, 0.0f, 0.0f, 1.0f);
+    // Translada até a posição final da Lua em relação à Terra,
     glTranslatef((lua.get_raio()+terra.get_raio()+lua.get_distancia())*1.6, 0.0f, 0.0f);
     
     glRotatef(-90.0f, 1.0f, 0.0f, 0.0f);
@@ -183,11 +206,16 @@ static void desenhaPlaneta(Astro& astro) {
         desenhaOrbita(astro.get_distancia());
     }
 
+    // Aplica o movimento de translação orbital
     glRotatef(astro.get_anguloTranslacao(), 0.0f, 1.0f, 0.0f);
+    // Move o planeta até sua posição
     glTranslatef(astro.get_distancia(), 0.0f, 0.0f);
-    glRotatef(-astro.get_anguloTranslacao(), 0.0f, 1.0f, 0.0f);
 
-    glRotatef(astro.get_inclinacaoEixo()-90, 1.0f, 0.0f, 0.0f);
+    // Ajusta a orientação para os polos ficarem alinhados no eixo Y
+    glRotatef(-90, 1.0f, 0.0f, 0.0f);
+    // Aplica a inclinação do eixo de rotação
+    glRotatef(astro.get_inclinacaoEixo(), 0.0f, 1.0f, 0.0f);
+    // Aplica a rotação em torno do próprio eixo
     glRotatef(astro.get_anguloRotacao(), 0.0f, 0.0f, 1.0f);
 
     if (astro.get_textura()) {
@@ -211,8 +239,12 @@ static void desenhaSol() {
 
     GLfloat emit[]     = {1.0f, 0.9f, 0.2f, 1.0f};
     GLfloat no_emit[]  = {0.0f, 0.0f, 0.0f, 1.0f};
+    // Define a propriedade de emissão de luz do material.
+    // Isso faz com que o Sol simule que ele emite luz
     glMaterialfv(GL_FRONT, GL_EMISSION, emit);
 
+    // Se houver textura do Sol, habilita mapeamento de textura
+    // e aplica a textura carregada.
     if (sol_tex) {
         glEnable(GL_TEXTURE_2D);
         glBindTexture(GL_TEXTURE_2D, sol_tex);
@@ -222,11 +254,14 @@ static void desenhaSol() {
         glColor3f(1.0f, 1.0f, 0.0f);
     }
 
+    // Cria uma esfera representando o Sol
     GLUquadric* q = gluNewQuadric();
     gluQuadricTexture(q, GL_TRUE);
     gluSphere(q, PROPORCAO_SOL_MERCURIO*RAIO_MERCURIO, 60, 60); 
     gluDeleteQuadric(q);
 
+    // Restaura a emissão para zero, para que
+    // outros objetos não brilhem como o Sol.
     glMaterialfv(GL_FRONT, GL_EMISSION, no_emit);
     glPopMatrix();
 }
@@ -405,8 +440,8 @@ void handleKeys(unsigned char key, int x, int y) {
             camera.set_posX(lookfrom[0]);
             camera.set_posY(lookfrom[1]);
             camera.set_posZ(lookfrom[2]);
-            camera.set_angle_hor(0.0f);
-            camera.set_angle_ver(0.0f);
+            camera.set_angle_hor(angleH);
+            camera.set_angle_ver(angleV);
             cameraLocked = false; // solta o lock ao resetar
             break;
     }
@@ -442,6 +477,7 @@ int main(int argc, char** argv) {
     glutDisplayFunc(display);
     glutReshapeFunc(reshape);
     glutKeyboardFunc(handleKeys);
+    glutKeyboardUpFunc(movementKeys);
     glutMouseFunc(mouseButton);
     glutMotionFunc(mouseMotion);
     glutTimerFunc(25, update, 0);
