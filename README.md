@@ -3,7 +3,7 @@
 
 Pequena simulação do sistema solar para estudos de computação gráfica.  
 
-## Comando para compilar:
+## Passos para compilação e execução do programa:
 #1  Instalação do pacote de desenvolvimento do FreeGLUT  
 ```bash
 sudo apt-get install freeglut3-dev
