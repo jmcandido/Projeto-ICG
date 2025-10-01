@@ -27,7 +27,7 @@ Alterar as propriedades do material(Sol) para que deixe ele emitindo luz,problem
 
 ## O que pode ser melhorado:  
 
-Melhorar as texturas, colocar o sinturão de cometas e fazer o anel de saturno melhorado.
+Melhorar as texturas, colocar o cinturão de cometas e fazer o anel de saturno melhorado.
 
 ## O que cada integrante fez:
 
