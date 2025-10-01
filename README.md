@@ -25,11 +25,11 @@ Site com as texturas: https://www.solarsystemscope.com/textures/
 
 Alterar as propriedades do material(Sol) para que deixe ele emitindo luz,problemas para achar os melhores valores para as rotações e translações dos planetas.
 
-## Oque pode ser melhorado:  
+## O que pode ser melhorado:  
 
 Melhorar as texturas, colocar o sinturão de cometas e fazer o anel de saturno melhorado.
 
-## Oque cada integrante fez:
+## O que cada integrante fez:
 
 No geral fizemos juntos em call, porém Rodrigo e João Marcelo focando em iluminação,textura,camera,teclas de movimento e Anderson no posicionamento dos planetas
 e movimento deles(rotação e translação).
