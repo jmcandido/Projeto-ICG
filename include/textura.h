@@ -6,6 +6,5 @@
 #include <SOIL/SOIL.h>
 
 GLuint loadTexture(const char* path);
-void configurarTextura(GLuint texturaID);
 
 #endif
