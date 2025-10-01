@@ -268,22 +268,25 @@ static void desenhaSol() {
 
 void follow() {
     if (!alvo) 
-        return; // evita crash se não tiver alvo selecionado
+        return; // evita crash se não tiver alvo selecionado(ponteiro nulo)
+    //posZ = r * cos(teta + delta) teta sendo o angulo de translação e delta sendo o espacamentoAngular(offset)
+    // o valor 0.0174533 é para converter graus em radianos (π/180)
     camera.set_posZ(alvo->get_distancia() * cos((alvo->get_anguloTranslacao()+espacamentoAngular)*0.0174533));
     camera.set_posX(alvo->get_distancia() * sin((alvo->get_anguloTranslacao()+espacamentoAngular)*0.0174533));
-    camera.set_posY(0.0);
+    camera.set_posY(0.0);// Funciona como um lookat aproximado com um pequeno ajuste para o angulo horizontal
 
     camera.set_angle_hor(-alvo->get_anguloTranslacao()*0.0174533f - 0.1f);
-    camera.set_angle_ver(0.0f);
+    camera.set_angle_ver(0.0f);// pitch da camera alinhado com plano zx
 }
 
 static void toggleLock(Astro* novoAlvo, float esp) {
+    // Se já estiver travado no mesmo alvo, destrava. Caso contrário, trava no novo alvo.
     if (cameraLocked && alvo == novoAlvo) {
-        cameraLocked = false;  // destrava se já estava no mesmo
+        cameraLocked = false;  
     } else {
         alvo = novoAlvo;
         espacamentoAngular = esp;
-        cameraLocked = true;   // trava no novo alvo
+        cameraLocked = true;  
     }
 }
 
@@ -329,14 +332,21 @@ static void initGL() {
 }
 
 static void display() {
+    //limpa a tela e o depth buffer 
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    //carrega a matriz identidade
     glLoadIdentity();
+    //aplica a transformação da câmera
     camera.applyView();
+    //desenha o background
     desenhaBackground();
-
+    // define a posição e o tipo de luz(posicional)
     GLfloat lightPos[] = {0.0f, 0.0f, 0.0f, 1.0f};
+    // Luz branca amarelada
     GLfloat lightDiff[] = {1.0f, 1.0f, 0.95f, 1.0f};
+    // Luz ambiente fraca para simular luz refletida por outros planetas
     GLfloat lightAmb[]  = {0.12f, 0.12f, 0.12f, 1.0f};
+    // Define as propriedades da luz GL_LIGHT0
     glLightfv(GL_LIGHT0, GL_POSITION, lightPos);
     glLightfv(GL_LIGHT0, GL_DIFFUSE,  lightDiff);
     glLightfv(GL_LIGHT0, GL_AMBIENT,  lightAmb);
@@ -369,17 +379,19 @@ void update(int value) {
 
     if (cameraLocked) 
         follow();
-    else{                                       // Atualiza a posição da câmera com base na direção de visualização
-        if (moveFoward) camera.moveForward();       // Se a tecla de mover para frente estiver pressionada
-        if (moveBackward) camera.moveBackward();    // Se a tecla de mover para trás estiver pressionada
-        if (moveLeft) camera.moveLeft();            // Se a tecla de mover para a esquerda estiver pressionada
-        if (moveRight) camera.moveRight();          // Se a tecla de mover para a direita estiver pressionada
-        if (moveUp) camera.moveUp();              // Mover a câmera para cima
-        if (moveDown) camera.moveDown();          // Mover a câmera para baixo
+    else{                                      
+        if (moveFoward) camera.moveForward();      
+        if (moveBackward) camera.moveBackward();    
+        if (moveLeft) camera.moveLeft();            
+        if (moveRight) camera.moveRight();          
+        if (moveUp) camera.moveUp();             
+        if (moveDown) camera.moveDown();          
     }
-
+    // Atualiza a direção de visualização da câmera
     camera.updateLookDirection();
+    //Redesenha a tela
     glutPostRedisplay();
+    //Agenda a próxima atualização(16ms ~ 60fps)
     glutTimerFunc(16, update, 0);
 }
 
@@ -484,4 +496,5 @@ int main(int argc, char** argv) {
 
     glutMainLoop();
     return 0;
+
 }
