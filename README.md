@@ -4,11 +4,20 @@
 Pequena simulação do sistema solar para estudos de computação gráfica.  
 
 ## Comando para compilar:
-#1 sudo apt-get install freeglut3-dev para instalar o GLUT  
+#1  Instalação do pacote de desenvolvimento do FreeGLUT  
+```bash
+sudo apt-get install freeglut3-dev
+```
 
-#2 sudo apt-get install libsoil-dev  
+#2 Instalação do pacote da biblioteca SOIL
+```bash
+sudo apt-get install libsoil-dev
+```
 
-#3 g++ src/main.cpp  src/astro.cpp src/camera.cpp src/textura.cpp -o sis -lGL -lGLU -lSOIL -lglut -lm  && ./sis
+#3 Compilação e execução do código
+```bash
+g++ src/main.cpp  src/astro.cpp src/camera.cpp src/textura.cpp -o sis -lGL -lGLU -lSOIL -lglut -lm  && ./sis
+```
 
 ## Texturas
 Site com as texturas: https://www.solarsystemscope.com/textures/
